@@ -3,8 +3,7 @@
 NODE_DIST=node-v${NODE_VERSION}-linux-${NODE_ARCH}
 
 cd /tmp
-wget http://nodejs.org/dist/v${NODE_VERSION}/${NODE_DIST}.tar.gz
-tar xvzf ${NODE_DIST}.tar.gz
+curl -L http://nodejs.org/dist/v${NODE_VERSION}/${NODE_DIST}.tar.gz | tar xvz -
 rm -rf /opt/nodejs
 mv ${NODE_DIST} /opt/nodejs
 
