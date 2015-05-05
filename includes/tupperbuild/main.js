@@ -3,9 +3,11 @@ var progress = require('progress'),
     pkgjson = require('./package.json'),
     fs = require('fs'),
     _ = require('lodash'),
+    async = require('async'),
     https = require('https');
 
-var tupperwareJsonDefaults = {
+var bar,
+    tupperwareJsonDefaults = {
       "dependencies": {
         "phantomJs": false,
         "imageMagick": false
@@ -20,59 +22,19 @@ var tupperwareJsonDefaults = {
       'force-yes': true
     };
 
+var copyPath = '/app',
+    meteorVersion,
+    tupperwareJson = {};
+
+
+/* Error out function */
 function suicide () {
   var logArgs = Array.prototype.splice.call(arguments, 0, 0 "\nAn error occurred: ");
   console.log(logArgs);
   process.exit(1);
 }
 
-function installPhantomJs (version) {
-  var aptDepdendencies = [
-    'libfreetype6',
-    'fontconfig',
-    'libfreetype6-dev'
-  ];
-
-  _.each(aptDepdendencies, function (dep, index) {
-    try {
-      aptGet.install(dep, aptGetOptions);
-    } catch (e) {
-      suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
-    }
-  });
-
-  var req = https.request({
-    host: 'download.github.com',
-    port: 443,
-    path: '/visionmedia-node-jscoverage-0d4608a.zip'
-  });
-
-  req.on('response', function (res){
-    var len = parseInt(res.headers['content-length'], 10);
-
-    var bar = new ProgressBar(' [:bar] :percent :etas', {
-      complete: '=',
-      incomplete: ' ',
-      total: len
-    });
-
-    res.on('data', function (chunk) {
-      bar.tick(chunk.length);
-    });
-
-    res.on('end', function () {
-      console.log('\n');
-    });
-  });
-
-  req.end();
-}
-
-function installImageMagick (version) {
-  // var aptDepdendencies =
-}
-
-function main () {
+function printBanner (done) {
   console.log(
     [
       "",
@@ -85,10 +47,10 @@ function main () {
   );
   console.log("github.com/chriswessels/meteor-tupperware (tupperbuild v" + pkgjson.version + ")\n");
 
-  var copyPath = '/app',
-      meteorVersion,
-      tupperwareJson = {};
+  done();
+}
 
+function checkCopyPath (done) {
   /* Check for .meteor folder in Dockerfile app copy path and extract meteor release version */
   try {
     meteorVersion = fs.readFileSync(copyPath + '/.meteor/release');
@@ -96,6 +58,10 @@ function main () {
     suicide("This doesn't look like a Meteor project.", e.toString());
   }
 
+  done();
+}
+
+function extractTupperwareJson (done) {
   /* Attempt to read in tupperware.json file for settings */
   try {
     tupperwareJson = require(copyPath + '/tupperware.json');
@@ -107,19 +73,100 @@ function main () {
   /* Patch object with defaults for anything undefined */
   _.defaults(tupperwareJson, tupperwareJsonDefaults);
 
-  /* If settings specifies PhantomJS should be installed, do it */
-  if (typeof tupperwareJson.dependencies.phantomJs === 'string') {
-    installPhantomJs(tupperwareJson.dependencies.phantomJs);
-  }
-
-  /* If settings specifies ImageMagick should be installed, do it */
-  if (typeof tupperwareJson.dependencies.imageMagick === 'string') {
-    installImageMagick(tupperwareJson.dependencies.imageMagick);
-  }
+  done();
 }
 
-// Kick things off
-main();
+function installAppDeps (done) {
+  function installPhantomJsDeps (done) {
+    var aptDependencies = [
+      'libfreetype6',
+      'fontconfig',
+      'libfreetype6-dev'
+    ];
+
+    bar = new ProgressBar('Installing PhantomJS dependencies [:bar] :percent :etas', {
+      complete: '=',
+      incomplete: ' ',
+      total: aptDependencies.length
+    });
+
+    _.each(aptDependencies, function (dep, index) {
+      try {
+        aptGet.install(dep, aptGetOptions).on('close', function(code) {
+          if (code === 0) {
+            bar.tick();
+            if (bar.complete) {
+              done();
+            }
+          } else {
+            throw new Error('apt-get return code: ' + code);
+          }
+        }).on('error', function (error) {
+          throw error;
+        });
+      } catch (e) {
+        suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
+      }
+    });
+  }
+  function installPhantomJs (done) {
+    var req = https.request({
+      host: 'download.github.com',
+      port: 443,
+      path: '/visionmedia-node-jscoverage-0d4608a.zip'
+    });
+
+    req.on('response', function (res){
+      var len = parseInt(res.headers['content-length'], 10);
+
+      var bar = new ProgressBar('Installing PhantomJS [:bar] :percent :etas', {
+        complete: '=',
+        incomplete: ' ',
+        total: len
+      });
+
+      res.on('data', function (chunk) {
+        bar.tick(chunk.length);
+      });
+
+      res.on('end', function () {
+        req.end();
+        if (bar.complete) {
+          done();
+        }
+      });
+    });
+  }
+
+  function installImageMagick (done) {
+    done();
+  }
+
+  var tasks = [];
+
+  if (typeof tupperwareJson.dependencies.phantomJs === 'string') {
+    tasks.push.apply(tasks, [installPhantomJsDeps, installPhantomJs]);
+  }
+  if (typeof tupperwareJson.dependencies.imageMagick === 'string') {
+    tasks.push(installImageMagick);
+  }
+
+  tasks.push(done);
+
+  async.series(tasks);
+}
+
+function installMeteor (done) {
+
+}
+
+async.series([
+  printBanner,
+  checkCopyPath,
+  extractTupperwareJson,
+  installAppDeps,
+  installMeteor
+]);
 
 // steps
 // check meteor project validiity
