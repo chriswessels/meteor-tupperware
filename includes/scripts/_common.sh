@@ -2,6 +2,7 @@
 
 # Environment variables
 export TUPPERBUILD_DIR="$BASEDIR/../tupperbuild"
+export OUTPUT_DIR="/output"
 export BUILD_DEPS="gcc libc6-dev make build-essential libssl-dev python"
 export IMAGE_UTILS="git wget curl ca-certificates sudo"
 
