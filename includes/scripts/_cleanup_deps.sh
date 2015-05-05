@@ -1,10 +1,16 @@
 #!/bin/sh
 
+echo "> Purging build dependencies..."
+
 # Purge build deps
 apt-get purge -y $BUILD_DEPS
+check_code $?
 
 # Autoremove any junk
 apt-get autoremove -y
+check_code $?
+
+echo "> Cleaning out docs, pkg management cruft and /tmp..."
 
 # Clean out docs
 rm -rf /usr/share/doc /usr/share/doc-base /usr/share/man /usr/share/locale /usr/share/zoneinfo
