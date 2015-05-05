@@ -18,16 +18,14 @@ You can then build your application into a fully assembled Docker image with:
 
 The root process of the container will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile. Node.js will listen on port 80 inside the container, but you can bind this to any port on the host.
 
-Examples:
+Example of passing options into docker run:
 
-```
-// Pass options into docker run
-$ docker run --rm -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://url -p 8080:80 yourname/app
+    $ docker run --rm -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://url -p 8080:80 yourname/app
 
-// Hardcode options in your Dockerfile
-FROM    chriswessels/meteor-tupperware
-ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://url"
-```
+Example of baking options into your Dockerfile:
+
+    FROM    chriswessels/meteor-tupperware
+    ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://url"
 
 ## Build configuration
 
