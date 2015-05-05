@@ -1,9 +1,10 @@
-var progress = require('progress'),
+var ProgressBar = require('progress'),
     aptGet = require('node-apt-get'),
     pkgjson = require('./package.json'),
     fs = require('fs'),
     _ = require('lodash'),
     async = require('async'),
+    child_process = require('child_process'),
     https = require('https');
 
 var bar,
@@ -29,8 +30,11 @@ var copyPath = '/app',
 
 /* Error out function */
 function suicide () {
-  var logArgs = Array.prototype.splice.call(arguments, 0, 0 "\nAn error occurred: ");
-  console.log(logArgs);
+  var args = Array.prototype.slice.call(arguments);
+
+  args.splice(0, 0, "\nAn error occurred:");
+
+  console.log.apply(console, args);
   process.exit(1);
 }
 
@@ -157,7 +161,13 @@ function installAppDeps (done) {
 }
 
 function installMeteor (done) {
+  console.log("Installing Meteor.js " + meteorVersion + "...");
+  child_process.spawnSync("curl https://install.meteor.com | sed -e -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' | sh");
+  done();
+}
 
+function bundleApp (done) {
+  // child_process.spawnSync("meteor bundle --architecture os.linux.x64_86");
 }
 
 async.series([

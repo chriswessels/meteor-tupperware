@@ -5,7 +5,7 @@ NODE_DIST=node-v${NODE_VERSION}-linux-${NODE_ARCH}
 echo "> Installing Node.js... $NODE_DIST"
 
 cd /tmp
-curl -L http://nodejs.org/dist/v${NODE_VERSION}/${NODE_DIST}.tar.gz | tar xvz
+curl -L http://nodejs.org/dist/v${NODE_VERSION}/${NODE_DIST}.tar.gz | tar xvzf --strip-components=1
 check_code $?
 
 rm -rf /opt/nodejs
