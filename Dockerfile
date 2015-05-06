@@ -1,7 +1,7 @@
 FROM          debian
 MAINTAINER    Chris Wessels (https://github.com/chriswessels)
 
-ENV           NODE_VERSION="0.10.38" NODE_ARCH="x64"
+ENV           NODE_VERSION="0.10.38"
 
 COPY          includes /tupperware
 
