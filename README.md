@@ -1,6 +1,6 @@
 # chriswessels/meteor-tupperware
 
-*Work in progress and not functional. Nothing to see here, yet!*
+* Alpha release - it's working! More documentation coming soon...*
 
 This is a base Docker image that allows you to bundle your [Meteor.js](https://www.meteor.com) application into a lean, production-ready Docker image that you can deploy across your containerised infrastructure.
 
@@ -20,12 +20,12 @@ The root process of the container will be set to the Node.js entrypoint for your
 
 Example of passing options into docker run:
 
-    $ docker run --rm -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://url -p 8080:80 yourname/app
+    $ docker run --rm -e ROOT_URL=http://yourapp.com -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://oplog_url -p 8080:80 yourname/app
 
 Example of baking options into your Dockerfile:
 
     FROM    chriswessels/meteor-tupperware
-    ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://url"
+    ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://oplog_url" ROOT_URL="http://yourapp.com"
 
 ## Build configuration
 
