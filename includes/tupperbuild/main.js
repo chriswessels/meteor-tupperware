@@ -29,9 +29,6 @@ var copyPath = '/app',
     meteorRelease,
     tupperwareJson = {};
 
-
-console.log(process.env.OUTPUT_DIR);
-
 /* Error out function */
 function suicide () {
   var args = Array.prototype.slice.call(arguments);
