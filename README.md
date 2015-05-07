@@ -33,8 +33,8 @@ Example of baking options into your Dockerfile:
 // Default configuration settings
 {
   "dependencies": {
-    "phantomJs": false, // or set to string version number
-    "imageMagick": false // or set to string version number
+    "phantomJs": false,
+    "imageMagick": false
   },
   "buildOptions": {
     "mobileServer": false,

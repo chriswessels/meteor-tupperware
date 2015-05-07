@@ -122,7 +122,7 @@ function installAppDeps (done) {
     async.series(tasks);
   }
   function downloadPhantomJs (done) {
-    var version = tupperwareJson.dependencies.phantomJs,
+    var version = process.env.PHANTOMJS_VERSION,
         folderName = 'phantomjs-' + version + '-linux-x86_64',
         tarName = folderName + '.tar.bz2',
         fileLocation = fs.createWriteStream("/tmp/" + tarName);
@@ -157,7 +157,7 @@ function installAppDeps (done) {
   }
 
   function installPhantomJs (done) {
-    var version = tupperwareJson.dependencies.phantomJs,
+    var version = process.env.PHANTOMJS_VERSION,
         folderName = 'phantomjs-' + version + '-linux-x86_64',
         tarName = folderName + '.tar.bz2';
 
@@ -197,17 +197,52 @@ function installAppDeps (done) {
   }
 
   function installImageMagick (done) {
-    done();
+    var version = process.env.IMAGEMAGICK_VERSION;
+
+    var aptDependencies = [
+      'imagemagick='+version
+    ];
+
+    bar = new ProgressBar('Installing ImageMagick ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
+      total: aptDependencies.length
+    }));
+
+    var tasks = [];
+
+    bar.render();
+
+    _.each(aptDependencies, function (dep, index) {
+      tasks.push(function (done) {
+        try {
+          child_process.spawn('apt-get', ['install', '-y', '--no-install-recommends', dep]).on('exit', function (code) {
+            if (code !== 0) {
+              throw new Error('Exit code: ' + code);
+            } else {
+              bar.tick();
+              done();
+            }
+          });
+        } catch (e) {
+          suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
+        }
+      });
+    });
+
+    tasks.push(function () {
+      done();
+    });
+
+    async.series(tasks);
   }
 
   var tasks = [];
 
-  if (typeof tupperwareJson.dependencies.phantomJs === 'string') {
+  if (tupperwareJson.dependencies.phantomJs === true) {
     tasks.push(installPhantomJsDeps);
     tasks.push(downloadPhantomJs);
     tasks.push(installPhantomJs);
   }
-  if (typeof tupperwareJson.dependencies.imageMagick === 'string') {
+  if (tupperwareJson.dependencies.imageMagick === true) {
     tasks.push(installImageMagick);
   }
 
