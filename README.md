@@ -8,33 +8,53 @@ It includes [Node.js](https://nodejs.org/) and your bundled application (with pl
 
 ## Usage
 
-To use meteor-tupperware, create a `Dockerfile` in your Meteor project directory with the following contents:
+### Set up quickstart
+
+In your Meteor.js project directory, run the following command:
+
+    $ curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh | sh
+
+This script will write a `Dockerfile` and `.dockerignore` into your current directory, preconfigured as below.
+
+After running the quickstart script, and assuming you have Docker running, you can build an image of your Meteor.js app by running:
+
+    $ docker build -t yourname/app .
+
+### Manual setup
+
+Using meteor-tupperware is very simple. Create a `Dockerfile` in your Meteor project directory with the following contents:
 
     FROM    chriswessels/meteor-tupperware
+
+This base image contains build triggers that will run when you build your app image. These triggers will build your app, install any dependencies, and leave you with a lean production-ready image.
 
 You'll also need to create a `.dockerignore` file in your Meteor project directory (alongside the Dockerfile) with the following contents:
 
     .meteor/local
     packages/*/.build*
 
-You can then build your application into a fully assembled Docker image with:
+This file instructs Docker not to copy build artifacts into the image as these will be rebuild anyway.
+
+Assuming you have Docker running, you can build an image of your Meteor.js app by running:
 
     $ docker build -t yourname/app .
 
-That's it! You can now run the image, push it to a registry, or whatever else you want. You have a production ready image of your app.
+## Running your app image
 
-The root process of the container will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile. Node.js will listen on port 80 inside the container, but you can bind this to any port on the host.
+The root process of the image will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile. Node.js will listen on port 80 inside the container, but you can bind this to any port on the host.
 
 Example of passing options into docker run:
 
     $ docker run --rm -e ROOT_URL=http://yourapp.com -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://oplog_url -p 8080:80 yourname/app
 
-Example of baking options into your Dockerfile:
+Example of baking options into your image using your `Dockerfile`:
 
     FROM    chriswessels/meteor-tupperware
     ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://oplog_url" ROOT_URL="http://yourapp.com"
 
 ## Build configuration
+
+meteor-tupperware supports a few build configuration options that can be modified by creating a `tupperware.json` file in your Meteor project directory, alongside your `Dockerfile`.
 
 Default configuration options:
 
@@ -51,16 +71,14 @@ Default configuration options:
 }
 ```
 
-You can override these options by creating a `tupperware.json` configuration file in your Meteor project directory, alongside your `Dockerfile`.
-
 ### Configuration Options Schema
 
 - dependencies
-  - phantomJs: `Boolean` (for installing PhantomJS)
-  - imageMagick: `Boolean` (for installing ImageMagick)
+  - phantomJs: `true` or `false` (for installing PhantomJS)
+  - imageMagick: `true` or `false` (for installing ImageMagick)
 - buildOptions
-  - mobileServerUrl: `false` or `string` (for specifying a server URL if you have mobile clients via Cordova)
-  - additionalFlags: `false` or `string` (for passing additional command line flags to `meteor build`)
+  - mobileServerUrl: `false` or type `string` (for specifying a server URL if you have mobile clients via Cordova)
+  - additionalFlags: `false` or type `string` (for passing additional command line flags to `meteor build`)
 
 ## License
 
