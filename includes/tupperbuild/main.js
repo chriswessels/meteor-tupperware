@@ -1,5 +1,4 @@
-var ProgressBar = require('progress'),
-    pkgjson = require('./package.json'),
+var pkgjson = require('./package.json'),
     fs = require('fs'),
     _ = require('lodash'),
     async = require('async'),
@@ -7,23 +6,16 @@ var ProgressBar = require('progress'),
     // https = require('follow-redirects').https;
     request = require('request');
 
-var bar,
-    barOptions = {
-      complete: '=',
-      incomplete: ' ',
-      width: 20,
-      stream: process.stdout
-    },
-    tupperwareJsonDefaults = {
-      "dependencies": {
-        "phantomJs": false,
-        "imageMagick": false
-      },
-      "buildOptions": {
-        "mobileServerUrl": false,
-        "additionalFlags": false
-      }
-    };
+var tupperwareJsonDefaults = {
+  "dependencies": {
+    "phantomJs": false,
+    "imageMagick": false
+  },
+  "buildOptions": {
+    "mobileServerUrl": false,
+    "additionalFlags": false
+  }
+};
 
 var copyPath = '/app',
     meteorRelease,
@@ -93,13 +85,9 @@ function installAppDeps (done) {
       'libfreetype6-dev'
     ];
 
-    bar = new ProgressBar('Installing PhantomJS dependencies [:bar] :percent :etas', _.extend({}, barOptions, {
-      total: aptDependencies.length
-    }));
+    console.log('Installing PhantomJS dependencies...');
 
     var tasks = [];
-
-    bar.render();
 
     _.each(aptDependencies, function (dep, index) {
       tasks.push(function (done) {
@@ -108,7 +96,6 @@ function installAppDeps (done) {
             if (code !== 0) {
               throw new Error('Exit code: ' + code);
             } else {
-              bar.tick();
               done();
             }
           });
@@ -135,26 +122,13 @@ function installAppDeps (done) {
     });
 
     request.get('https://bitbucket.org/ariya/phantomjs/downloads/' + tarName).on('response', function (res) {
-      var len = parseInt(res.headers['content-length'], 10);
 
-      bar = new ProgressBar('Downloading PhantomJS ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
-        total: len
-      }));
-
-      bar.render();
+      console.log('Downloading PhantomJS ' + version + '...');
 
       res.pipe(fileLocation);
 
-      res.on('data', function (chunk) {
-        bar.tick(chunk.length);
-      });
-
       res.on('end', function () {
-        if (bar.complete) {
-          done();
-        } else {
-          throw new Error('Download finished prematurely.');
-        }
+        done();
       });
     });
   }
@@ -164,13 +138,7 @@ function installAppDeps (done) {
         folderName = 'phantomjs-' + version + '-linux-x86_64',
         tarName = folderName + '.tar.bz2';
 
-    var steps = 2;
-
-    bar = new ProgressBar('Installing PhantomJS ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
-      total: steps
-    }));
-
-    bar.render();
+    console.log('Installing PhantomJS ' + version + '...');
 
     async.series([
       function (done) {
@@ -178,7 +146,6 @@ function installAppDeps (done) {
           if (code !== 0) {
             suicide('tar exit code: ' + code);
           } else {
-            bar.tick();
             done();
           }
         });
@@ -188,7 +155,6 @@ function installAppDeps (done) {
           if (code !== 0) {
             suicide('ln exit code: ' + code);
           } else {
-            bar.tick();
             done();
           }
         });
@@ -206,13 +172,9 @@ function installAppDeps (done) {
       'imagemagick='+version
     ];
 
-    bar = new ProgressBar('Installing ImageMagick ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
-      total: aptDependencies.length
-    }));
+    console.log('Installing ImageMagick ' + version + '...');
 
     var tasks = [];
-
-    bar.render();
 
     _.each(aptDependencies, function (dep, index) {
       tasks.push(function (done) {
@@ -221,7 +183,6 @@ function installAppDeps (done) {
             if (code !== 0) {
               throw new Error('Exit code: ' + code);
             } else {
-              bar.tick();
               done();
             }
           });
@@ -263,13 +224,7 @@ function downloadMeteorInstaller (done) {
   var matches = versionRegex.exec(meteorRelease);
   meteorVersion = matches[1];
 
-  var steps = 2;
-
-  bar = new ProgressBar('Downloading Meteor ' + meteorVersion + ' Installer [:bar] :percent :etas', _.extend({}, barOptions, {
-    total: steps
-  }));
-
-  bar.render();
+  console.log('Downloading Meteor ' + meteorVersion + ' Installer...');
 
   async.series([
     function (done) {
@@ -277,7 +232,6 @@ function downloadMeteorInstaller (done) {
         if (code !== 0) {
           suicide('curl exit code: ' + code);
         } else {
-          bar.tick();
           done();
         }
       });
@@ -287,7 +241,6 @@ function downloadMeteorInstaller (done) {
         if (code !== 0) {
           suicide('sed exit code: ' + code);
         } else {
-          bar.tick();
           done();
         }
       });
