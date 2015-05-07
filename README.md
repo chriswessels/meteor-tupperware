@@ -26,14 +26,14 @@ Using meteor-tupperware is very simple. Create a `Dockerfile` in your Meteor pro
 
     FROM    chriswessels/meteor-tupperware
 
-This base image contains build triggers that will run when you build your app image. These triggers will build your app, install any dependencies, and leave you with a lean production-ready image.
+This base image contains build triggers that will run when you build your app image. These triggers will build your app, install any dependencies, and leave you with a lean, production-ready image.
 
 You'll also need to create a `.dockerignore` file in your Meteor project directory (alongside the Dockerfile) with the following contents:
 
     .meteor/local
     packages/*/.build*
 
-This file instructs Docker not to copy build artifacts into the image as these will be rebuild anyway.
+This file instructs Docker not to copy build artifacts into the image as these will be rebuilt anyway.
 
 Assuming you have Docker running, you can build an image of your Meteor.js app by running:
 

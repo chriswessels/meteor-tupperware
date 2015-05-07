@@ -23,8 +23,8 @@ if [[ ! -z "$user_name" ]]; then
   read user_email
   if [[ ! -z "$user_email" ]]; then
     maintainer="$maintainer <$user_email>"
-    maintainer_string="MAINTAINER $maintainer"
   fi
+  maintainer_string="MAINTAINER $maintainer"
   echo "> Got it. The image maintainer will be set to: $maintainer"
 fi
 
