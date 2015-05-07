@@ -1,6 +1,6 @@
 # chriswessels/meteor-tupperware
 
-* Alpha release - it's working! More documentation coming soon...*
+*Alpha release - it's working! More documentation coming soon...*
 
 This is a base Docker image that allows you to bundle your [Meteor.js](https://www.meteor.com) application into a lean, production-ready Docker image that you can deploy across your containerised infrastructure.
 
