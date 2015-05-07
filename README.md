@@ -37,8 +37,8 @@ Example of baking options into your Dockerfile:
     "imageMagick": false
   },
   "buildOptions": {
-    "mobileServer": false,
-    "additionalFlags": false
+    "mobileServerUrl": false, // or set to URL string
+    "additionalFlags": false // or set to string containing build flags
   }
 }
 ```

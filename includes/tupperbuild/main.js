@@ -20,15 +20,17 @@ var bar,
         "imageMagick": false
       },
       "buildOptions": {
-        "mobileServer": false,
+        "mobileServerUrl": false,
         "additionalFlags": false
       }
     };
 
 var copyPath = '/app',
-    meteorVersion,
+    meteorRelease,
     tupperwareJson = {};
 
+
+console.log(process.env.OUTPUT_DIR);
 
 /* Error out function */
 function suicide () {
@@ -44,10 +46,14 @@ function printBanner (done) {
   console.log(
     [
       "",
-      "_/_    __  __    _  __ _   _ _   __   _ ",
-      "(__(_(_/_)_/_)__(/_/ (_(_(/ (_(_/ (__(/_",
-      "    .-/ .-/                             ",
-      "   (_/ (_/                              ",
+      "  _                                                      ",
+      " | |                                                     ",
+      " | |_ _   _ _ __  _ __   ___ _ ____      ____ _ _ __ ___ ",
+      " | __| | | | '_ \\| '_ \\ / _ \\ '__\\ \\ /\\ / / _` | '__/ _ \\",
+      " | |_| |_| | |_) | |_) |  __/ |   \\ V  V / (_| | | |  __/",
+      "  \\__|\\__,_| .__/| .__/ \\___|_|    \\_/\\_/ \\__,_|_|  \\___|",
+      "           | |   | |                                     ",
+      "           |_|   |_|",
       ""
     ].join("\n")
   );
@@ -59,7 +65,7 @@ function printBanner (done) {
 function checkCopyPath (done) {
   /* Check for .meteor folder in Dockerfile app copy path and extract meteor release version */
   try {
-    meteorVersion = fs.readFileSync(copyPath + '/.meteor/release');
+    meteorRelease = fs.readFileSync(copyPath + '/.meteor/release');
   } catch (e) {
     suicide("This doesn't look like a Meteor project.", e.toString());
   }
@@ -253,15 +259,101 @@ function installAppDeps (done) {
   async.series(tasks);
 }
 
-function installMeteor (done) {
-  process.exit(0);
-  // console.log("Installing Meteor.js " + meteorVersion + "...");
-  // child_process.spawn('curl', ['https://install.meteor.com | sed -e -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' | sh");
-  done();
+function downloadMeteorInstaller (done) {
+  var meteorVersion,
+      versionRegex = new RegExp('^METEOR@(.*)\n', 'ig');
+
+  var matches = versionRegex.exec(meteorRelease);
+  meteorVersion = matches[1];
+
+  var steps = 2;
+
+  bar = new ProgressBar('Downloading Meteor ' + meteorVersion + ' Installer [:bar] :percent :etas', _.extend({}, barOptions, {
+    total: steps
+  }));
+
+  bar.render();
+
+  async.series([
+    function (done) {
+      child_process.spawn('curl', ['https://install.meteor.com', '-o', '/tmp/install_meteor.sh']).on('exit', function (code) {
+        if (code !== 0) {
+          suicide('curl exit code: ' + code);
+        } else {
+          bar.tick();
+          done();
+        }
+      });
+    },
+    function (done) {
+      child_process.exec("sed -i.bak -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' /tmp/install_meteor.sh").on('exit', function (code) {
+        if (code !== 0) {
+          suicide('sed exit code: ' + code);
+        } else {
+          bar.tick();
+          done();
+        }
+      });
+    },
+    function () {
+      done();
+    }
+  ]);
 }
 
-function bundleApp (done) {
-  // child_process.spawnSync("meteor bundle --architecture os.linux.x64_86");
+function installMeteor (done) {
+  child_process.spawn('sh', ['/tmp/install_meteor.sh'], { stdio: 'inherit' }).on('exit', function (code) {
+    if (code !== 0) {
+      suicide('installer exit code: ' + code);
+    } else {
+      done();
+    }
+  });
+}
+
+function buildApp (done) {
+  console.log('Building your app...');
+  var serverFlag = tupperwareJson.buildOptions.mobileServerUrl ? '--server ' + tupperwareJson.buildOptions.mobileServerUrl + ' ' : '',
+      additionalFlags = tupperwareJson.buildOptions.additionalFlags ? tupperwareJson.buildOptions.additionalFlags : '';
+
+  child_process.exec("meteor build --directory " + process.env.OUTPUT_DIR + " --architecture os.linux.x86_64 " + serverFlag + additionalFlags, {
+    cwd: copyPath
+  }).on('exit', function (code) {
+    if (code !== 0) {
+      suicide('meteor build exit code: ' + code);
+    } else {
+      done();
+    }
+  });
+}
+
+function cleanMeteor (done) {
+  console.log("Cleaning up Meteor...");
+  child_process.exec("rm /usr/local/bin/meteor && rm -rf ~/.meteor").on('exit', function (code) {
+    if (code !== 0) {
+      suicide('cleanup exit code: ' + code);
+    } else {
+      done();
+    }
+  });
+}
+
+function npmInstall (done) {
+  console.log("Installing npm dependencies for your app...");
+  child_process.exec('npm install', {
+    cwd: process.env.OUTPUT_DIR + '/bundle/programs/server'
+  }).on('exit', function (code) {
+    if (code !== 0) {
+      suicide('npm exit code: ' + code);
+    } else {
+      done();
+    }
+  });
+}
+
+function printDone (done) {
+  console.log("Done!");
+  done();
 }
 
 async.series([
@@ -269,7 +361,12 @@ async.series([
   checkCopyPath,
   extractTupperwareJson,
   installAppDeps,
-  installMeteor
+  downloadMeteorInstaller,
+  installMeteor,
+  buildApp,
+  cleanMeteor,
+  npmInstall,
+  printDone
 ]);
 
 // steps

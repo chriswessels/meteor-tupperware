@@ -7,6 +7,8 @@ BASEDIR=`dirname $0`
 node $TUPPERBUILD_DIR/main.js
 check_code $?
 
+rm -rf /tmp/*
+
 # if [ ! -z "$INSTALL_PHANTOMJS" ]; then
 #   ARCH=`uname -m`
 
