@@ -8,7 +8,7 @@ It includes [Node.js](https://nodejs.org/) and your bundled application (with pl
 
 ## Usage
 
-### Set up quickstart
+### Quickstart
 
 In your Meteor.js project directory, run the following command:
 
