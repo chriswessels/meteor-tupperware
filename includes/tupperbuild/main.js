@@ -1,13 +1,19 @@
 var ProgressBar = require('progress'),
-    aptGet = require('node-apt-get'),
     pkgjson = require('./package.json'),
     fs = require('fs'),
     _ = require('lodash'),
     async = require('async'),
     child_process = require('child_process'),
-    https = require('https');
+    // https = require('follow-redirects').https;
+    request = require('request');
 
 var bar,
+    barOptions = {
+      complete: '=',
+      incomplete: ' ',
+      width: 20,
+      stream: process.stdout
+    },
     tupperwareJsonDefaults = {
       "dependencies": {
         "phantomJs": false,
@@ -17,10 +23,6 @@ var bar,
         "mobileServer": false,
         "additionalFlags": false
       }
-    },
-    aptGetOptions = {
-      'no-install-recommends': true,
-      'force-yes': true
     };
 
 var copyPath = '/app',
@@ -88,58 +90,110 @@ function installAppDeps (done) {
       'libfreetype6-dev'
     ];
 
-    bar = new ProgressBar('Installing PhantomJS dependencies [:bar] :percent :etas', {
-      complete: '=',
-      incomplete: ' ',
+    bar = new ProgressBar('Installing PhantomJS dependencies [:bar] :percent :etas', _.extend({}, barOptions, {
       total: aptDependencies.length
-    });
+    }));
+
+    var tasks = [];
+
+    bar.render();
 
     _.each(aptDependencies, function (dep, index) {
-      try {
-        aptGet.install(dep, aptGetOptions).on('close', function(code) {
-          if (code === 0) {
-            bar.tick();
-            if (bar.complete) {
+      tasks.push(function (done) {
+        try {
+          child_process.spawn('apt-get', ['install', '-y', '--no-install-recommends', dep]).on('exit', function (code) {
+            if (code !== 0) {
+              throw new Error('Exit code: ' + code);
+            } else {
+              bar.tick();
               done();
             }
-          } else {
-            throw new Error('apt-get return code: ' + code);
-          }
-        }).on('error', function (error) {
-          throw error;
-        });
-      } catch (e) {
-        suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
-      }
-    });
-  }
-  function installPhantomJs (done) {
-    var req = https.request({
-      host: 'download.github.com',
-      port: 443,
-      path: '/visionmedia-node-jscoverage-0d4608a.zip'
+          });
+        } catch (e) {
+          suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
+        }
+      });
     });
 
-    req.on('response', function (res){
+    tasks.push(function () {
+      done();
+    });
+
+    async.series(tasks);
+  }
+  function downloadPhantomJs (done) {
+    var version = tupperwareJson.dependencies.phantomJs,
+        folderName = 'phantomjs-' + version + '-linux-x86_64',
+        tarName = folderName + '.tar.bz2',
+        fileLocation = fs.createWriteStream("/tmp/" + tarName);
+
+    fileLocation.on('finish', function () {
+      fileLocation.close();
+    });
+
+    request.get('https://bitbucket.org/ariya/phantomjs/downloads/' + tarName).on('response', function (res) {
       var len = parseInt(res.headers['content-length'], 10);
 
-      var bar = new ProgressBar('Installing PhantomJS [:bar] :percent :etas', {
-        complete: '=',
-        incomplete: ' ',
+      bar = new ProgressBar('Downloading PhantomJS ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
         total: len
-      });
+      }));
+
+      bar.render();
+
+      res.pipe(fileLocation);
 
       res.on('data', function (chunk) {
         bar.tick(chunk.length);
       });
 
       res.on('end', function () {
-        req.end();
         if (bar.complete) {
           done();
+        } else {
+          throw new Error('Download finished prematurely.');
         }
       });
     });
+  }
+
+  function installPhantomJs (done) {
+    var version = tupperwareJson.dependencies.phantomJs,
+        folderName = 'phantomjs-' + version + '-linux-x86_64',
+        tarName = folderName + '.tar.bz2';
+
+    var steps = 2;
+
+    bar = new ProgressBar('Installing PhantomJS ' + version + ' [:bar] :percent :etas', _.extend({}, barOptions, {
+      total: steps
+    }));
+
+    bar.render();
+
+    async.series([
+      function (done) {
+        child_process.spawn('tar', ['-xjf', '/tmp/' + tarName, '-C', '/usr/local/share/']).on('exit', function (code) {
+          if (code !== 0) {
+            suicide('tar exit code: ' + code);
+          } else {
+            bar.tick();
+            done();
+          }
+        });
+      },
+      function (done) {
+        child_process.spawn('ln', ['-s', '-f', '/usr/local/share/' + folderName + '/bin/phantomjs', '/usr/bin/phantomjs']).on('exit', function (code) {
+          if (code !== 0) {
+            suicide('ln exit code: ' + code);
+          } else {
+            bar.tick();
+            done();
+          }
+        });
+      },
+      function () {
+        done();
+      }
+    ]);
   }
 
   function installImageMagick (done) {
@@ -149,20 +203,25 @@ function installAppDeps (done) {
   var tasks = [];
 
   if (typeof tupperwareJson.dependencies.phantomJs === 'string') {
-    tasks.push.apply(tasks, [installPhantomJsDeps, installPhantomJs]);
+    tasks.push(installPhantomJsDeps);
+    tasks.push(downloadPhantomJs);
+    tasks.push(installPhantomJs);
   }
   if (typeof tupperwareJson.dependencies.imageMagick === 'string') {
     tasks.push(installImageMagick);
   }
 
-  tasks.push(done);
+  tasks.push(function () {
+    done();
+  });
 
   async.series(tasks);
 }
 
 function installMeteor (done) {
-  console.log("Installing Meteor.js " + meteorVersion + "...");
-  child_process.spawnSync("curl https://install.meteor.com | sed -e -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' | sh");
+  process.exit(0);
+  // console.log("Installing Meteor.js " + meteorVersion + "...");
+  // child_process.spawn('curl', ['https://install.meteor.com | sed -e -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' | sh");
   done();
 }
 
