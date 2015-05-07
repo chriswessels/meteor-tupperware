@@ -12,13 +12,13 @@ It includes [Node.js](https://nodejs.org/) and your bundled application (with pl
 
 In your Meteor.js project directory, run the following command:
 
-    $ curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh | sh
+    curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh > /tmp/quickstart.sh && sh /tmp/quickstart.sh
 
 This script will write a `Dockerfile` and `.dockerignore` into your current directory, preconfigured as below.
 
 After running the quickstart script, and assuming you have Docker running, you can build an image of your Meteor.js app by running:
 
-    $ docker build -t yourname/app .
+    docker build -t yourname/app .
 
 ### Manual setup
 
@@ -37,7 +37,7 @@ This file instructs Docker not to copy build artifacts into the image as these w
 
 Assuming you have Docker running, you can build an image of your Meteor.js app by running:
 
-    $ docker build -t yourname/app .
+    docker build -t yourname/app .
 
 ## Running your app image
 
@@ -45,7 +45,7 @@ The root process of the image will be set to the Node.js entrypoint for your Met
 
 Example of passing options into docker run:
 
-    $ docker run --rm -e ROOT_URL=http://yourapp.com -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://oplog_url -p 8080:80 yourname/app
+    docker run --rm -e ROOT_URL=http://yourapp.com -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://oplog_url -p 8080:80 yourname/app
 
 Example of baking options into your image using your `Dockerfile`:
 
