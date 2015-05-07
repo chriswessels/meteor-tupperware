@@ -12,6 +12,11 @@ To use meteor-tupperware, create a `Dockerfile` in your Meteor project directory
 
     FROM    chriswessels/meteor-tupperware
 
+You'll also need to create a `.dockerignore` file in your Meteor project directory (alongside the Dockerfile) with the following contents:
+
+    .meteor/local
+    packages/*/.build*
+
 You can then build your application into a fully assembled Docker image with:
 
     $ docker build -t yourname/app .
