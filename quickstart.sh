@@ -9,23 +9,23 @@ maintainer_string="# MAINTAINER Darth Vader <darth@thedeathstar.io>"
 echo "\n>> meteor-tupperware quickstart script $QUICKSTART_VERSION\n"
 
 if [[ -f $PWD/Dockerfile || -f $PWD/.dockerignore ]]; then
-  echo "! A Dockerfile or .dockerignore file already exists in this directory, $PWD. Please check, remove them and rerun this tool."
-  exit 1
+echo "! A Dockerfile or .dockerignore file already exists in this directory, $PWD. Please check, remove them and rerun this tool."
+exit 1
 fi
 
 echo "] Docker Image Maintainer Information"
 echo "? Please enter your name: "
 read user_name
 if [[ ! -z "$user_name" ]]; then
-  maintainer="$user_name"
+maintainer="$user_name"
 
-  echo "? Thanks, $user_name. Now your e-mail address:"
-  read user_email
-  if [[ ! -z "$user_email" ]]; then
-    maintainer="$maintainer <$user_email>"
-  fi
-  maintainer_string="MAINTAINER $maintainer"
-  echo "> Got it. The image maintainer will be set to: $maintainer"
+echo "? Thanks, $user_name. Now your e-mail address:"
+read user_email
+if [[ ! -z "$user_email" ]]; then
+  maintainer="$maintainer <$user_email>"
+fi
+maintainer_string="MAINTAINER $maintainer"
+echo "> Got it. The image maintainer will be set to: $maintainer"
 fi
 
 cat <<EOF > ./Dockerfile
