@@ -1,7 +1,5 @@
 # chriswessels/meteor-tupperware
 
-*Alpha release - it's working! More documentation coming soon...*
-
 This is a base Docker image that allows you to bundle your [Meteor.js](https://www.meteor.com) application into a lean, production-ready Docker image that you can deploy across your containerised infrastructure.
 
 It includes [Node.js](https://nodejs.org/) and your bundled application (with platform-correct native extensions where required by included npm modules). You can also configure meteor-tupperware to install PhantomJS and ImageMagick if these are dependencies of your application.
@@ -45,7 +43,12 @@ The root process of the image will be set to the Node.js entrypoint for your Met
 
 Example of passing options into docker run:
 
-    docker run --rm -e ROOT_URL=http://yourapp.com -e MONGO_URL=mongodb://url -e MONGO_OPLOG_URL=mongodb://oplog_url -p 8080:80 yourname/app
+    docker run --rm \
+    -e ROOT_URL=http://yourapp.com \
+    -e MONGO_URL=mongodb://url \
+    -e MONGO_OPLOG_URL=mongodb://oplog_url \
+    -p 8080:80 \
+    yourname/app
 
 Example of baking options into your image using your `Dockerfile`:
 
@@ -79,6 +82,30 @@ Default configuration options:
 - buildOptions
   - mobileServerUrl: `false` or type `string` (for specifying a server URL if you have mobile clients via Cordova)
   - additionalFlags: `false` or type `string` (for passing additional command line flags to `meteor build`)
+
+## Comparison with meteord
+
+1. meteor-tupperware produces significantly smaller images (179.8MB vs 310.4MB - last updated 09/05/15) than meteord.
+
+1. meteor-tupperware easily supports building Meteor.js apps that have mobile apps via Meteor Cordova integration by allowing you to specify additional build flags (for --mobile-settings or --server). meteord is not this flexible.
+
+1. meteor-tupperware doesn't include PhantomJS by default, but this is configurable. meteord bundles it in irrespective of necessity.
+
+1. meteor-tupperware allows you to easily include ImageMagick if it is a dependency of your app.
+
+1. meteord allows you to run an already-built app bundle inside a container from: a) a local mount or; b) a downloadable bundle archive.
+
+meteor-tupperware doesn't support this.
+
+## Contributions
+
+Contributions are welcomed and appreciated!
+
+1. Fork this repository.
+1. Make your changes, documenting your new code with comments.
+1. Submit a pull request with a sane commit message.
+
+Feel free to get in touch if you have any questions.
 
 ## License
 
