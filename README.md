@@ -85,17 +85,15 @@ Default configuration options:
 
 ## Comparison with meteord
 
-1. meteor-tupperware produces significantly smaller images (179.8MB vs 310.4MB - last updated 09/05/15) than meteord.
+1. meteor-tupperware produces smaller images (base of 170MB vs 220MB) than meteord.
 
-1. meteor-tupperware easily supports building Meteor.js apps that have mobile apps via Meteor Cordova integration by allowing you to specify additional build flags (for --mobile-settings or --server). meteord is not this flexible.
+1. meteor-tupperware supports configuring additional build flags (like --mobile-settings or --server). meteord is not this flexible.
 
-1. meteor-tupperware doesn't include PhantomJS by default, but this is configurable. meteord bundles it in irrespective of necessity.
+1. meteor-tupperware doesn't include PhantomJS by default, but you can include it with one setting. meteord bundles it in irrespective of necessity (and this produces larger images).
 
 1. meteor-tupperware allows you to easily include ImageMagick if it is a dependency of your app.
 
-1. meteord allows you to run an already-built app bundle inside a container from: a) a local mount or; b) a downloadable bundle archive.
-
-meteor-tupperware doesn't support this.
+1. meteord allows you to run an already-built app bundle inside a container from: a) a local mount or; b) a downloadable bundle archive. meteor-tupperware doesn't support this.
 
 ## Contributions
 
