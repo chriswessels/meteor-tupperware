@@ -9,4 +9,14 @@ if [ ! -f $OUTPUT_DIR/bundle/main.js ]; then
   exit 1
 fi
 
-PORT=80 node $OUTPUT_DIR/bundle/main.js "$@"
+export PORT=80
+
+if [ -z "$NODE_ENV" ]; then
+  export NODE_ENV="production"
+fi
+
+if [ -z "$METEOR_ENV" ]; then
+  export METEOR_ENV="production"
+fi
+
+exec node $OUTPUT_DIR/bundle/main.js "$@"

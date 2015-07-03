@@ -4,6 +4,8 @@ This is a base Docker image that allows you to bundle your [Meteor.js](https://w
 
 It includes [Node.js](https://nodejs.org/) and your bundled application (with platform-correct native extensions where required by included npm modules). You can also configure meteor-tupperware to install PhantomJS and ImageMagick if these are dependencies of your application.
 
+Please see the [CHANGELOG](https://github.com/chriswessels/meteor-tupperware/blob/master/CHANGELOG.md) for the latest bundled library versions and changes.
+
 ## Usage
 
 ### Quickstart
@@ -61,7 +63,8 @@ meteor-tupperware supports a few build configuration options that can be modifie
 
 Default configuration options:
 
-```json
+```javascript
+/* tupperware.json */
 {
   "dependencies": {
     "phantomJs": false,
@@ -89,7 +92,7 @@ Default configuration options:
 
 1. meteor-tupperware supports configuring additional build flags (like --mobile-settings or --server). meteord is not this flexible.
 
-1. meteor-tupperware doesn't include PhantomJS by default, but you can include it with one setting. meteord bundles it in irrespective of necessity (and this produces larger images).
+1. meteor-tupperware doesn't include PhantomJS by default, but you can include it with one setting. meteord bundles it in irrespective of necessity (producing larger images).
 
 1. meteor-tupperware allows you to easily include ImageMagick if it is a dependency of your app.
 
