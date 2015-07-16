@@ -14,13 +14,13 @@ In your Meteor.js project directory, run the following command:
 
     curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh > /tmp/quickstart.sh && sh /tmp/quickstart.sh
 
-This script will write a `Dockerfile` and `.dockerignore` into your current directory, preconfigured as below.
+This script will write a `Dockerfile` and `.dockerignore` into your current directory, preconfigured as in **Manual Setup** below.
 
 After running the quickstart script, and assuming you have Docker running, you can build an image of your Meteor.js app by running:
 
     docker build -t yourname/app .
 
-### Manual setup
+#### Manual setup (skip if you used Quickstart)
 
 Using meteor-tupperware is very simple. Create a `Dockerfile` in your Meteor project directory with the following contents:
 
@@ -43,7 +43,7 @@ Assuming you have Docker running, you can build an image of your Meteor.js app b
 
 The root process of the image will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile. Node.js will listen on port 80 inside the container, but you can bind this to any port on the host.
 
-Example of passing options into docker run:
+Example of passing options into `docker run` at runtime:
 
     docker run --rm \
     -e ROOT_URL=http://yourapp.com \
@@ -52,14 +52,16 @@ Example of passing options into docker run:
     -p 8080:80 \
     yourname/app
 
-Example of baking options into your image using your `Dockerfile`:
+This example will run your Meteor application configured to connect to Mongo at `mongodb://url`, the Mongo oplog at `mongodb://oplog_url`, and will listen on port `8080` on the host, with Meteor expecting the public address of your app to be `http://yourapp.com`.
+
+Example of baking options into your image using your `Dockerfile` so you don't have to pass them in at runtime:
 
     FROM    chriswessels/meteor-tupperware
     ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://oplog_url" ROOT_URL="http://yourapp.com"
 
 ## Build configuration
 
-meteor-tupperware supports a few build configuration options that can be modified by creating a `tupperware.json` file in your Meteor project directory, alongside your `Dockerfile`.
+meteor-tupperware supports a few build configuration options that can be modified by creating a `tupperware.json` file in your Meteor project directory, alongside your `Dockerfile`. After changing `tupperware.json` you will need to rebuild your image with `docker build` (as above).
 
 Default configuration options:
 
@@ -77,7 +79,7 @@ Default configuration options:
 }
 ```
 
-### Configuration Options Schema
+### tupperware.json Schema
 
 - dependencies
   - phantomJs: `true` or `false` (for installing PhantomJS)

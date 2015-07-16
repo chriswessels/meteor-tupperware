@@ -2,7 +2,7 @@
 
 ## Change log
 
-### 0.1.1
+### 0.1.1 (2015-07-03)
 
 - Updated Node.js.
 - Changed app run script to set environment variables `NODE_ENV` and `METEOR_ENV` to `production` by default. You can override these in your `docker run` command with `-e`.
@@ -16,7 +16,7 @@ Bundles:
 - Quickstart 0.1.0
 - Tupperbuild 0.1.0
 
-### 0.1.0
+### 0.1.0 (2015-05-09)
 
 - Initial Release.
 
