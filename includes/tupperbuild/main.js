@@ -18,7 +18,8 @@ var tupperwareJsonDefaults = {
 };
 
 var copyPath = '/app',
-    meteorRelease,
+    meteorReleaseString,
+    meteorVersion,
     tupperwareJson = {};
 
 /* Error out function */
@@ -54,7 +55,7 @@ function printBanner (done) {
 function checkCopyPath (done) {
   /* Check for .meteor folder in Dockerfile app copy path and extract meteor release version */
   try {
-    meteorRelease = fs.readFileSync(copyPath + '/.meteor/release');
+    meteorReleaseString = fs.readFileSync(copyPath + '/.meteor/release');
   } catch (e) {
     suicide("This doesn't look like a Meteor project.", e.toString());
   }
@@ -218,10 +219,10 @@ function installAppDeps (done) {
 }
 
 function downloadMeteorInstaller (done) {
-  var meteorVersion,
-      versionRegex = new RegExp('^METEOR@(.*)\n', 'ig');
+  var versionRegex = new RegExp('^METEOR@(.*)\n', 'ig');
 
-  var matches = versionRegex.exec(meteorRelease);
+  var matches = versionRegex.exec(meteorReleaseString);
+
   meteorVersion = matches[1];
 
   console.log('Downloading Meteor ' + meteorVersion + ' Installer...');
@@ -252,6 +253,8 @@ function downloadMeteorInstaller (done) {
 }
 
 function installMeteor (done) {
+  console.log('Installing Meteor ' + meteorVersion + '...');
+  
   child_process.spawn('sh', ['/tmp/install_meteor.sh'], { stdio: 'inherit' }).on('exit', function (code) {
     if (code !== 0) {
       suicide('installer exit code: ' + code);
@@ -318,11 +321,3 @@ async.series([
   npmInstall,
   printDone
 ]);
-
-// steps
-// check meteor project validiity
-// attempt reading tupperware.json
-// download and install deps (phantom or imagemagick)
-// check meteor version and download and install meteor
-// use meteor build on project
-// remove meteor

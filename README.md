@@ -2,6 +2,8 @@
 
 This is a base Docker image that allows you to bundle your [Meteor.js](https://www.meteor.com) application into a lean, production-ready Docker image that you can deploy across your containerised infrastructure.
 
+[![Docker Repository on Quay.io](https://quay.io/repository/chriswessels/meteor-tupperware/status "Docker Repository on Quay.io")](https://quay.io/repository/chriswessels/meteor-tupperware)
+
 It includes [Node.js](https://nodejs.org/) and your bundled application (with platform-correct native extensions where required by included npm modules). You can also configure meteor-tupperware to install PhantomJS and ImageMagick if these are dependencies of your application.
 
 Please see the [CHANGELOG](https://github.com/chriswessels/meteor-tupperware/blob/master/CHANGELOG.md) for the latest bundled library versions and changes.
@@ -24,7 +26,7 @@ After running the quickstart script, and assuming you have Docker running, you c
 
 Using meteor-tupperware is very simple. Create a `Dockerfile` in your Meteor project directory with the following contents:
 
-    FROM    chriswessels/meteor-tupperware
+    FROM    quay.io/chriswessels/meteor-tupperware
 
 This base image contains build triggers that will run when you build your app image. These triggers will build your app, install any dependencies, and leave you with a lean, production-ready image.
 
@@ -56,7 +58,7 @@ This example will run your Meteor application configured to connect to Mongo at 
 
 Example of baking options into your image using your `Dockerfile` so you don't have to pass them in at runtime:
 
-    FROM    chriswessels/meteor-tupperware
+    FROM    quay.io/chriswessels/meteor-tupperware
     ENV     MONGO_URL="mongodb://url" MONGO_OPLOG_URL="mongodb://oplog_url" ROOT_URL="http://yourapp.com"
 
 ## Build configuration

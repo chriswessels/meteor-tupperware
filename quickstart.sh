@@ -1,6 +1,6 @@
 #!/bin/sh
 
-QUICKSTART_VERSION="0.1.0"
+QUICKSTART_VERSION="0.1.1"
 PWD=`pwd`
 
 # Defaults
@@ -33,7 +33,7 @@ cat <<EOF > ./Dockerfile
 # https://github.com/chriswessels/meteor-tupperware
 
 # Inherit from chriswessels/meteor-tupperware image
-FROM chriswessels/meteor-tupperware
+FROM quay.io/chriswessels/meteor-tupperware
 
 # The maintainer of your app image
 $maintainer_string
