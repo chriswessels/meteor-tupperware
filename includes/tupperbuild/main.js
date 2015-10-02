@@ -309,15 +309,21 @@ function printDone (done) {
   done();
 }
 
-async.series([
-  printBanner,
-  checkCopyPath,
-  extractTupperwareJson,
-  installAppDeps,
-  downloadMeteorInstaller,
-  installMeteor,
-  buildApp,
-  cleanMeteor,
-  npmInstall,
-  printDone
-]);
+if (process.argv[2] == "install") {
+  async.series([
+    checkCopyPath,
+    extractTupperwareJson,
+    installAppDeps,
+    downloadMeteorInstaller,
+    installMeteor
+  ]);
+} else {
+  async.series([
+    printBanner,
+    extractTupperwareJson,
+    buildApp,
+    cleanMeteor,
+    npmInstall,
+    printDone
+  ]);
+}
