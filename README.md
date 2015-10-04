@@ -74,6 +74,7 @@ Default configuration options:
     "phantomJs": false,
     "imageMagick": false
   },
+  "beforeBuildShellScript": null,
   "buildOptions": {
     "mobileServerUrl": false,
     "additionalFlags": false
@@ -89,6 +90,7 @@ Default configuration options:
 - buildOptions
   - mobileServerUrl: `false` or type `string` (for specifying a server URL if you have mobile clients via Cordova)
   - additionalFlags: `false` or type `string` (for passing additional command line flags to `meteor build`)
+  - beforeBuildShellScript: `string` (for specifiying a custom shell script path to be run before the `meteor build` step. Path should be relative to your app directory)
 
 ## Comparison with meteord
 
