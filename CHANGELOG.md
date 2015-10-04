@@ -2,6 +2,16 @@
 
 ## Change log
 
+### 1.0.0 (2015-10-04)
+
+Bundles:
+
+- Node.js 0.10.40
+- Tupperbuild 1.0.0
+- Quickstart 0.1.1
+- PhantomJS 1.9.8 (optional)
+- ImageMagick 8:6.7.7.10-5+deb7u3 (optional)
+
 ### 0.1.2 (2015-07-23)
 
 - Updated Node.js.

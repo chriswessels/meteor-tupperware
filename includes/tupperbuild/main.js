@@ -22,32 +22,60 @@ var copyPath = '/app',
     meteorVersion,
     tupperwareJson = {};
 
-/* Error out function */
+var log = {};
+
+log.info = function () {
+  var args = Array.prototype.slice.apply(arguments);
+  args.splice(0, 0, '[-] ');
+  return console.log.apply(console, args);
+};
+
+log.error = function () {
+  var args = Array.prototype.slice.apply(arguments);
+  args.splice(0, 0, '[!] ');
+  return console.log.apply(console, args);
+};
+
+/* Utils */
 function suicide () {
-  var args = Array.prototype.slice.call(arguments);
-
-  args.splice(0, 0, "\nAn error occurred:");
-
-  console.log.apply(console, args);
+  log.info('Container build failed. meteor-tupperware is exiting...');
   process.exit(1);
 }
+
+function handleExecError(done, cmd, taskDesc, error, stdout, stderr) {
+  if (! error) {
+    done();
+  } else {
+    log.error('While attempting to ' + taskDesc + ', the command:', cmd);
+    log.error('Failed with the exit code ' + error.code + '. The signal was ' + error.signal + '.');
+    if (stdout) {
+      log.info('The task produced the following stdout:');
+      console.log(stdout);
+    }
+    if (stderr) {
+      log.info('The task produced the following stderr:');
+      console.log(stderr);
+    }
+    suicide();
+  }
+}
+
+/* Steps */
 
 function printBanner (done) {
   console.log(
     [
       "",
       "  _                                                      ",
-      " | |                                                     ",
       " | |_ _   _ _ __  _ __   ___ _ ____      ____ _ _ __ ___ ",
       " | __| | | | '_ \\| '_ \\ / _ \\ '__\\ \\ /\\ / / _` | '__/ _ \\",
       " | |_| |_| | |_) | |_) |  __/ |   \\ V  V / (_| | | |  __/",
       "  \\__|\\__,_| .__/| .__/ \\___|_|    \\_/\\_/ \\__,_|_|  \\___|",
-      "           | |   | |                                     ",
-      "           |_|   |_|",
+      "           |_|   |_|                                     ",
       ""
     ].join("\n")
   );
-  console.log("github.com/chriswessels/meteor-tupperware (tupperbuild v" + pkgjson.version + ")\n");
+  log.info("github.com/chriswessels/meteor-tupperware (tupperbuild v" + pkgjson.version + ")\n");
 
   done();
 }
@@ -67,9 +95,9 @@ function extractTupperwareJson (done) {
   /* Attempt to read in tupperware.json file for settings */
   try {
     tupperwareJson = require(copyPath + '/tupperware.json');
-    console.log('Settings in tupperware.json registered...');
+    log.info('Settings in tupperware.json registered.');
   } catch (e) {
-    console.log('No tupperware.json found, falling back to default settings...');
+    log.info('No tupperware.json found, using defaults.');
   }
 
   /* Patch object with defaults for anything undefined */
@@ -79,6 +107,11 @@ function extractTupperwareJson (done) {
 }
 
 function installAppDeps (done) {
+  function updateAptLists(done) {
+    log.info('Updating Package Lists...');
+    var cmd = 'apt-get update';
+    child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'update apt package lists'));
+  }
   function installPhantomJsDeps (done) {
     var aptDependencies = [
       'libfreetype6',
@@ -86,23 +119,14 @@ function installAppDeps (done) {
       'libfreetype6-dev'
     ];
 
-    console.log('Installing PhantomJS dependencies...');
+    log.info('Installing PhantomJS dependencies...');
 
     var tasks = [];
 
     _.each(aptDependencies, function (dep, index) {
       tasks.push(function (done) {
-        try {
-          child_process.spawn('apt-get', ['install', '-y', '--no-install-recommends', dep]).on('exit', function (code) {
-            if (code !== 0) {
-              throw new Error('Exit code: ' + code);
-            } else {
-              done();
-            }
-          });
-        } catch (e) {
-          suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
-        }
+        var cmd = 'apt-get install -y --no-install-recommends ' + dep;
+        child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'install ' + dep));
       });
     });
 
@@ -124,7 +148,7 @@ function installAppDeps (done) {
 
     request.get('https://bitbucket.org/ariya/phantomjs/downloads/' + tarName).on('response', function (res) {
 
-      console.log('Downloading PhantomJS ' + version + '...');
+      log.info('Downloading PhantomJS ' + version + '...');
 
       res.pipe(fileLocation);
 
@@ -139,26 +163,16 @@ function installAppDeps (done) {
         folderName = 'phantomjs-' + version + '-linux-x86_64',
         tarName = folderName + '.tar.bz2';
 
-    console.log('Installing PhantomJS ' + version + '...');
+    log.info('Installing PhantomJS ' + version + '...');
 
     async.series([
       function (done) {
-        child_process.spawn('tar', ['-xjf', '/tmp/' + tarName, '-C', '/usr/local/share/']).on('exit', function (code) {
-          if (code !== 0) {
-            suicide('tar exit code: ' + code);
-          } else {
-            done();
-          }
-        });
+        var cmd = 'tar -xjf /tmp/' + tarName + ' -C /usr/local/share/';
+        child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'extracting PhantomJS'));
       },
       function (done) {
-        child_process.spawn('ln', ['-s', '-f', '/usr/local/share/' + folderName + '/bin/phantomjs', '/usr/bin/phantomjs']).on('exit', function (code) {
-          if (code !== 0) {
-            suicide('ln exit code: ' + code);
-          } else {
-            done();
-          }
-        });
+        var cmd = 'ln -s -f /usr/local/share/' + folderName + '/bin/phantomjs /usr/bin/phantomjs';
+        child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'linking PhantomJS'));
       },
       function () {
         done();
@@ -173,23 +187,14 @@ function installAppDeps (done) {
       'imagemagick='+version
     ];
 
-    console.log('Installing ImageMagick ' + version + '...');
+    log.info('Installing ImageMagick ' + version + '...');
 
     var tasks = [];
 
     _.each(aptDependencies, function (dep, index) {
       tasks.push(function (done) {
-        try {
-          child_process.spawn('apt-get', ['install', '-y', '--no-install-recommends', dep]).on('exit', function (code) {
-            if (code !== 0) {
-              throw new Error('Exit code: ' + code);
-            } else {
-              done();
-            }
-          });
-        } catch (e) {
-          suicide("Couldn't install " + dep + ' via apt-get.', e.toString());
-        }
+        var cmd = 'apt-get install -y --no-install-recommends ' + dep;
+        child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'install ' + dep));
       });
     });
 
@@ -201,6 +206,10 @@ function installAppDeps (done) {
   }
 
   var tasks = [];
+
+  if (tupperwareJson.dependencies.phantomJs === true || tupperwareJson.dependencies.imagemagick === true) {
+    tasks.push(updateAptLists);
+  }
 
   if (tupperwareJson.dependencies.phantomJs === true) {
     tasks.push(installPhantomJsDeps);
@@ -225,26 +234,16 @@ function downloadMeteorInstaller (done) {
 
   meteorVersion = matches[1];
 
-  console.log('Downloading Meteor ' + meteorVersion + ' Installer...');
+  log.info('Downloading Meteor ' + meteorVersion + ' Installer...');
 
   async.series([
     function (done) {
-      child_process.spawn('curl', ['https://install.meteor.com', '-o', '/tmp/install_meteor.sh']).on('exit', function (code) {
-        if (code !== 0) {
-          suicide('curl exit code: ' + code);
-        } else {
-          done();
-        }
-      });
+      var cmd = 'curl https://install.meteor.com -o /tmp/install_meteor.sh';
+      child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'download the Meteor.js installer'));
     },
     function (done) {
-      child_process.exec("sed -i.bak -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' /tmp/install_meteor.sh").on('exit', function (code) {
-        if (code !== 0) {
-          suicide('sed exit code: ' + code);
-        } else {
-          done();
-        }
-      });
+      var cmd = "sed -i.bak -r 's/RELEASE=\".*\"/RELEASE=" + meteorVersion + "/g' /tmp/install_meteor.sh";
+      child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'patch the Meteor.js installer'));
     },
     function () {
       done();
@@ -253,77 +252,72 @@ function downloadMeteorInstaller (done) {
 }
 
 function installMeteor (done) {
-  console.log('Installing Meteor ' + meteorVersion + '...');
-  
-  child_process.spawn('sh', ['/tmp/install_meteor.sh'], { stdio: 'inherit' }).on('exit', function (code) {
-    if (code !== 0) {
-      suicide('installer exit code: ' + code);
-    } else {
-      done();
-    }
-  });
+  log.info('Installing Meteor ' + meteorVersion + '...');
+  var cmd = 'sh /tmp/install_meteor.sh';
+  child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'install Meteor.js'));
 }
 
 function buildApp (done) {
-  console.log('Building your app...');
+  log.info('Building your app...');
   var serverFlag = tupperwareJson.buildOptions.mobileServerUrl ? '--server ' + tupperwareJson.buildOptions.mobileServerUrl + ' ' : '',
       additionalFlags = tupperwareJson.buildOptions.additionalFlags ? tupperwareJson.buildOptions.additionalFlags : '';
 
-  child_process.exec("meteor build --directory " + process.env.OUTPUT_DIR + " --architecture os.linux.x86_64 " + serverFlag + additionalFlags, {
+  var cmd = "meteor build --directory " + process.env.OUTPUT_DIR + " --architecture os.linux.x86_64 " + serverFlag + additionalFlags;
+  child_process.exec(cmd, {
     cwd: copyPath
-  }).on('exit', function (code) {
-    if (code !== 0) {
-      suicide('meteor build exit code: ' + code);
-    } else {
-      done();
-    }
-  });
-}
-
-function cleanMeteor (done) {
-  console.log("Cleaning up Meteor...");
-  child_process.exec("rm /usr/local/bin/meteor && rm -rf ~/.meteor").on('exit', function (code) {
-    if (code !== 0) {
-      suicide('cleanup exit code: ' + code);
-    } else {
-      done();
-    }
-  });
+  }, _.partial(handleExecError, done, cmd, 'build your application'));
 }
 
 function npmInstall (done) {
-  console.log("Installing npm dependencies for your app...");
-  child_process.exec('npm install', {
-    cwd: process.env.OUTPUT_DIR + '/bundle/programs/server'
-  }).on('exit', function (code) {
-    if (code !== 0) {
-      suicide('npm exit code: ' + code);
-    } else {
+  log.info("Installing npm dependencies for your app...");
+
+  var cmd = 'npm install',
+      cwd = process.env.OUTPUT_DIR + '/bundle/programs/server';
+
+  child_process.exec(cmd, {
+    cwd: cwd
+  }, _.partial(handleExecError, done, cmd, 'install your application\'s npm dependencies'));
+}
+
+function runCleanup (done) {
+  log.info("Performing final image cleanup...");
+
+  async.series([
+    function (done) {
+      var cmd = "rm /usr/local/bin/meteor && rm -rf ~/.meteor";
+      child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'cleaning Meteor.js from the filesystem'));
+    },
+    function (done) {
+      var cmd = 'sh /tupperware/scripts/_on_build_cleanup.sh';
+      child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'perform cleanup actions'));
+    },
+    function () {
       done();
     }
-  });
+  ]);
 }
 
 function printDone (done) {
-  console.log("Done!");
+  log.info("Success!");
   done();
 }
 
-if (process.argv[2] == "install") {
+if (process.argv[2] === "install") {
   async.series([
+    printBanner,
     checkCopyPath,
     extractTupperwareJson,
     installAppDeps,
     downloadMeteorInstaller,
     installMeteor
   ]);
-} else {
+} else if (process.argv[2] === "build") {
   async.series([
     printBanner,
     extractTupperwareJson,
     buildApp,
-    cleanMeteor,
     npmInstall,
+    runCleanup,
     printDone
   ]);
 }

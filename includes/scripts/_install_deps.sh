@@ -1,18 +1,18 @@
 #!/bin/sh
 
-echo "> Updating system..."
+echo "[-] Updating system..."
 
-# System update
+# Lists update
 apt-get update
 check_code $?
 
-echo "> Installing build dependencies... $BUILD_DEPS"
+echo "[-] Installing build dependencies... $BUILD_DEPS"
 
 # Build deps (to be removed in cleanup.sh)
 apt-get install -y --no-install-recommends $BUILD_DEPS
 check_code $?
 
-echo "> Installing image utils... $IMAGE_UTILS"
+echo "[-] Installing image utils... $IMAGE_UTILS"
 
 # Sys utils
 apt-get install -y --no-install-recommends $IMAGE_UTILS

@@ -2,7 +2,7 @@
 
 NODE_DIST=node-v${NODE_VERSION}-linux-x64
 
-echo "> Installing Node.js... $NODE_DIST"
+echo "[-] Installing Node.js... $NODE_DIST"
 
 cd /tmp
 

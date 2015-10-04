@@ -7,4 +7,4 @@ BASEDIR=`dirname $0`
 node $TUPPERBUILD_DIR/main.js $1
 check_code $?
 
-rm -rf /tmp/*
+. $BASEDIR/_cleanup_deps.sh

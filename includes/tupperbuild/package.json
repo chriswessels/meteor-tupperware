@@ -1,6 +1,6 @@
 {
   "name": "tupperbuild",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Dockerfile ON BUILD script for meteor-tupperware",
   "main": "main.js",
   "scripts": {

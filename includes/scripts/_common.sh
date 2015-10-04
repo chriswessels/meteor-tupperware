@@ -9,7 +9,7 @@ export IMAGE_UTILS="git wget curl ca-certificates sudo bzip2"
 # Function for checking process return codes
 check_code () {
   if [ ! "$1" -eq 0 ]; then
-    echo "! Failure. Exiting..."
+    echo "[!] Failure. Exiting..."
     exit 1
   fi
 }

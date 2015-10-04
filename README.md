@@ -92,7 +92,7 @@ Default configuration options:
 
 ## Comparison with meteord
 
-1. meteor-tupperware produces smaller images (base of 170MB vs 220MB) than meteord.
+1. meteor-tupperware produces smaller images than meteord.
 
 1. meteor-tupperware supports configuring additional build flags (like --mobile-settings or --server). meteord is not this flexible.
 
