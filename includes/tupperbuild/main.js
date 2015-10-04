@@ -11,6 +11,7 @@ var tupperwareJsonDefaults = {
     "phantomJs": false,
     "imageMagick": false
   },
+  "beforeBuildShellScript": null,
   "buildOptions": {
     "mobileServerUrl": false,
     "additionalFlags": false
@@ -264,6 +265,21 @@ function installMeteor (done) {
   });
 }
 
+function runBeforeBuildShellScript (done) {
+  if (tupperwareJson.beforeBuildShellScript) {
+    console.log('Running before build script')
+    child_process.spawn('sh', [copyPath + "/" + tupperwareJson.beforeBuildShellScript], { stdio: 'inherit', cwd: copyPath }).on('exit', function (code) {
+      if (code !== 0) {
+        suicide('before build script exit code: ' + code);
+      } else {
+        done();
+      }
+    });
+  } else {
+    done();
+  }
+}
+
 function buildApp (done) {
   console.log('Building your app...');
   var serverFlag = tupperwareJson.buildOptions.mobileServerUrl ? '--server ' + tupperwareJson.buildOptions.mobileServerUrl + ' ' : '',
@@ -321,6 +337,7 @@ if (process.argv[2] == "install") {
   async.series([
     printBanner,
     extractTupperwareJson,
+    runBeforeBuildShellScript,
     buildApp,
     cleanMeteor,
     npmInstall,
