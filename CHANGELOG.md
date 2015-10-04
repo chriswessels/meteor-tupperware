@@ -4,6 +4,11 @@
 
 ### 1.0.0 (2015-10-04)
 
+- Improved image cleanup tactics. Images should be slightly smaller.
+- Improved the way tupperbuild executes commands. If an error occurs, it will report the `stderr` and `stdout`.
+- Improved order of onbuild triggers to utilise intermediary layer caching (thanks @ijpiantanida).
+- Added ability to specify pre and post `meteor build` commands to be run. See README.
+
 Bundles:
 
 - Node.js 0.10.40

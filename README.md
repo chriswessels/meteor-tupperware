@@ -70,6 +70,7 @@ Default configuration options:
 ```javascript
 /* tupperware.json */
 {
+  "preBuildCommands": [],
   "dependencies": {
     "phantomJs": false,
     "imageMagick": false
@@ -86,21 +87,17 @@ Default configuration options:
 - dependencies
   - phantomJs: `true` or `false` (for installing PhantomJS)
   - imageMagick: `true` or `false` (for installing ImageMagick)
+- preBuildCommands `[string]` (an array of commands to run before `meteor build`. Paths are relative to your app directory)
+- postBuildCommands `[string]` (an array of commands to run after `meteor build`. Paths are relative to your app directory)
 - buildOptions
   - mobileServerUrl: `false` or type `string` (for specifying a server URL if you have mobile clients via Cordova)
   - additionalFlags: `false` or type `string` (for passing additional command line flags to `meteor build`)
 
-## Comparison with meteord
+### Pre and post build commands
 
-1. meteor-tupperware produces smaller images than meteord.
+As above, you can use the `preBuildCommands` option in `tupperware.json` to specify a list of commands that should be run prior to `meteor build`. You can use `postBuildCommands` to specify a list of commands that should be run after. The commands are executed within your app directory (`/app` with the container image).
 
-1. meteor-tupperware supports configuring additional build flags (like --mobile-settings or --server). meteord is not this flexible.
-
-1. meteor-tupperware doesn't include PhantomJS by default, but you can include it with one setting. meteord bundles it in irrespective of necessity (producing larger images).
-
-1. meteor-tupperware allows you to easily include ImageMagick if it is a dependency of your app.
-
-1. meteord allows you to run an already-built app bundle inside a container from: a) a local mount or; b) a downloadable bundle archive. meteor-tupperware doesn't support this.
+This can be useful for installing private smart packages for your Meteor app prior to building, or performing post build transformations/cleanup.
 
 ## Contributions
 

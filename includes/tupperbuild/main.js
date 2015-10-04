@@ -11,13 +11,16 @@ var tupperwareJsonDefaults = {
     "phantomJs": false,
     "imageMagick": false
   },
+  "preBuildCommands": [],
+  "postBuildCommands": [],
   "buildOptions": {
     "mobileServerUrl": false,
     "additionalFlags": false
   }
 };
 
-var copyPath = '/app',
+var runMode = '',
+    copyPath = '/app',
     meteorReleaseString,
     meteorVersion,
     tupperwareJson = {};
@@ -76,7 +79,7 @@ function printBanner (done) {
     ].join("\n")
   );
   log.info("github.com/chriswessels/meteor-tupperware (tupperbuild v" + pkgjson.version + ")\n");
-
+  log.info("Running in " + runMode + " mode.");
   done();
 }
 
@@ -85,7 +88,8 @@ function checkCopyPath (done) {
   try {
     meteorReleaseString = fs.readFileSync(copyPath + '/.meteor/release');
   } catch (e) {
-    suicide("This doesn't look like a Meteor project.", e.toString());
+    log.error("This doesn't look like a Meteor project.");
+    suicide();
   }
 
   done();
@@ -252,9 +256,55 @@ function downloadMeteorInstaller (done) {
 }
 
 function installMeteor (done) {
+  // Have to use child_process.spawn instead of child_process.exec here
+  // Otherwise Meteor installer dies randomly...
+
   log.info('Installing Meteor ' + meteorVersion + '...');
-  var cmd = 'sh /tmp/install_meteor.sh';
-  child_process.exec(cmd, _.partial(handleExecError, done, cmd, 'install Meteor.js'));
+
+  var cmd = 'sh',
+      args = ['/tmp/install_meteor.sh'];
+
+  var stdOut = '', stdErr = '';
+
+  var child = child_process.spawn(cmd, args);
+  child.stdout.on('data', function (data) {
+      stdOut += data;
+  });
+  child.stderr.on('data', function (data) {
+      stdErr += data;
+  });
+  child.on('close', function (code) {
+    var error;
+    if (code !== 0) {
+      error = { code: code };
+    }
+    handleExecError(done, cmd + ' ' + args.join(' '), 'install Meteor.js', error, stdOut, stdErr);
+  });
+}
+
+function runPreBuildCommands (done) {
+  if (tupperwareJson.preBuildCommands.length > 0) {
+    log.info('Running pre-build commands...');
+
+    var tasks = [];
+
+    _.each(tupperwareJson.preBuildCommands, function (cmd, index) {
+      tasks.push(function (done) {
+        child_process.exec(cmd, {
+          cwd: copyPath
+        }, _.partial(handleExecError, done, cmd, 'run pre-build command'));
+      });
+    });
+
+    tasks.push(function () {
+      done();
+    });
+
+    async.series(tasks);
+
+  } else {
+    done();
+  }
 }
 
 function buildApp (done) {
@@ -277,6 +327,31 @@ function npmInstall (done) {
   child_process.exec(cmd, {
     cwd: cwd
   }, _.partial(handleExecError, done, cmd, 'install your application\'s npm dependencies'));
+}
+
+function runPostBuildCommands (done) {
+  if (tupperwareJson.postBuildCommands.length > 0) {
+    log.info('Running post-build commands...');
+
+    var tasks = [];
+
+    _.each(tupperwareJson.postBuildCommands, function (cmd, index) {
+      tasks.push(function (done) {
+        child_process.exec(cmd, {
+          cwd: copyPath
+        }, _.partial(handleExecError, done, cmd, 'run post-build command'));
+      });
+    });
+
+    tasks.push(function () {
+      done();
+    });
+
+    async.series(tasks);
+
+  } else {
+    done();
+  }
 }
 
 function runCleanup (done) {
@@ -302,7 +377,11 @@ function printDone (done) {
   done();
 }
 
-if (process.argv[2] === "install") {
+// Kick things off
+
+runMode = process.argv[2];
+
+if (runMode === "install") {
   async.series([
     printBanner,
     checkCopyPath,
@@ -311,12 +390,14 @@ if (process.argv[2] === "install") {
     downloadMeteorInstaller,
     installMeteor
   ]);
-} else if (process.argv[2] === "build") {
+} else if (runMode === "build") {
   async.series([
     printBanner,
     extractTupperwareJson,
+    runPreBuildCommands,
     buildApp,
     npmInstall,
+    runPostBuildCommands,
     runCleanup,
     printDone
   ]);
