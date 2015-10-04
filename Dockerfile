@@ -11,12 +11,6 @@ EXPOSE        80
 
 ENTRYPOINT    sh /tupperware/scripts/start_app.sh
 
-ONBUILD COPY  ./.meteor/release  /app/.meteor/release
-
-ONBUILD COPY  ./*.json  /app/
-
-ONBUILD RUN   sh /tupperware/scripts/on_build.sh install
-
 ONBUILD COPY  ./ /app
 
-ONBUILD RUN   sh /tupperware/scripts/on_build.sh build
+ONBUILD RUN   sh /tupperware/scripts/on_build.sh

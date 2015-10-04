@@ -19,8 +19,7 @@ var tupperwareJsonDefaults = {
   }
 };
 
-var runMode = '',
-    copyPath = '/app',
+var copyPath = '/app',
     meteorReleaseString,
     meteorVersion,
     tupperwareJson = {};
@@ -79,7 +78,7 @@ function printBanner (done) {
     ].join("\n")
   );
   log.info("github.com/chriswessels/meteor-tupperware (tupperbuild v" + pkgjson.version + ")\n");
-  log.info("Running in " + runMode + " mode.");
+
   done();
 }
 
@@ -379,26 +378,17 @@ function printDone (done) {
 
 // Kick things off
 
-runMode = process.argv[2];
-
-if (runMode === "install") {
-  async.series([
-    printBanner,
-    checkCopyPath,
-    extractTupperwareJson,
-    installAppDeps,
-    downloadMeteorInstaller,
-    installMeteor
-  ]);
-} else if (runMode === "build") {
-  async.series([
-    printBanner,
-    extractTupperwareJson,
-    runPreBuildCommands,
-    buildApp,
-    npmInstall,
-    runPostBuildCommands,
-    runCleanup,
-    printDone
-  ]);
-}
+async.series([
+  printBanner,
+  checkCopyPath,
+  extractTupperwareJson,
+  installAppDeps,
+  downloadMeteorInstaller,
+  installMeteor,
+  runPreBuildCommands,
+  buildApp,
+  npmInstall,
+  runPostBuildCommands,
+  runCleanup,
+  printDone
+]);
