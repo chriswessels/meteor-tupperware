@@ -70,11 +70,12 @@ Default configuration options:
 ```javascript
 /* tupperware.json */
 {
-  "preBuildCommands": [],
   "dependencies": {
     "phantomJs": false,
     "imageMagick": false
   },
+  "preBuildCommands": [],
+  "postBuildCommands": [],
   "buildOptions": {
     "mobileServerUrl": false,
     "additionalFlags": false
