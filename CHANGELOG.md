@@ -2,7 +2,22 @@
 
 ## Change log
 
-### 1.0.1 (2015-10-04)
+### 1.1.0 (2016-01-27)
+
+- Updated to `debian:jessie` base image for security updates.
+- Updated to Node.js 0.10.41.
+- Updated to ImageMagick 8:6.8.9.9-5.
+- Updated to PhantomJS 2.1.1.
+
+Bundles:
+
+- Node.js 0.10.41
+- Tupperbuild 1.0.0
+- Quickstart 0.1.2
+- PhantomJS 2.1.1 (optional)
+- ImageMagick 8:6.8.9.9-5 (optional)
+
+### 1.0.1 (2016-01-27)
 
 - Updated README and quickstart `.dockerignore` to include `packages/*/.npm*`. Thanks @dperetti.
 

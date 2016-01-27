@@ -1,7 +1,7 @@
-FROM          debian:wheezy
+FROM          debian:jessie
 MAINTAINER    Chris Wessels (https://github.com/chriswessels)
 
-ENV           NODE_VERSION="0.10.40" PHANTOMJS_VERSION="1.9.8" IMAGEMAGICK_VERSION="8:6.7.7.10-5+deb7u3"
+ENV           NODE_VERSION="0.10.41" PHANTOMJS_VERSION="2.1.1" IMAGEMAGICK_VERSION="8:6.8.9.9-5"
 
 COPY          includes /tupperware
 
