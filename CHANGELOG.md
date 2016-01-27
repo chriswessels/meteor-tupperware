@@ -2,6 +2,18 @@
 
 ## Change log
 
+### 1.0.1 (2015-10-04)
+
+- Updated README and quickstart `.dockerignore` to include `packages/*/.npm*`. Thanks @dperetti.
+
+Bundles:
+
+- Node.js 0.10.40
+- Tupperbuild 1.0.0
+- Quickstart 0.1.2
+- PhantomJS 1.9.8 (optional)
+- ImageMagick 8:6.7.7.10-5+deb7u3 (optional)
+
 ### 1.0.0 (2015-10-04)
 
 - Improved image cleanup tactics. Images should be slightly smaller.

@@ -34,6 +34,7 @@ You'll also need to create a `.dockerignore` file in your Meteor project directo
 
     .meteor/local
     packages/*/.build*
+    packages/*/.npm*
 
 This file instructs Docker not to copy build artifacts into the image as these will be rebuilt anyway.
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-QUICKSTART_VERSION="0.1.1"
+QUICKSTART_VERSION="0.1.2"
 PWD=`pwd`
 
 # Defaults
@@ -45,6 +45,7 @@ EOF
 cat <<EOF > ./.dockerignore
 .meteor/local
 packages/*/.build*
+packages/*/.npm*
 EOF
 
 echo "\n] Success"
