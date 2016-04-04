@@ -14,7 +14,7 @@ Please see the [CHANGELOG](https://github.com/chriswessels/meteor-tupperware/blo
 
 In your Meteor.js project directory, run the following command:
 
-    curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh > /tmp/quickstart.sh && sh /tmp/quickstart.sh
+    curl https://raw.githubusercontent.com/chriswessels/meteor-tupperware/master/quickstart.sh > /tmp/quickstart.sh && bash /tmp/quickstart.sh
 
 This script will write a `Dockerfile` and `.dockerignore` into your current directory, preconfigured as in **Manual Setup** below.
 

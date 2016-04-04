@@ -2,6 +2,18 @@
 
 ## Change log
 
+### 1.2.0 (2016-04-05)
+
+- Updated Node.js to 0.10.43
+
+Bundles:
+
+- Node.js 0.10.43
+- Tupperbuild 1.0.0
+- Quickstart 0.1.2
+- PhantomJS 2.1.1 (optional)
+- ImageMagick 8:6.8.9.9-5 (optional)
+
 ### 1.1.1 (2016-01-27)
 
 - Updated GPG receive keys for Node.js releases

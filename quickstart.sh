@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 QUICKSTART_VERSION="0.1.2"
 PWD=`pwd`
