@@ -2,6 +2,10 @@
 
 ## Change log
 
+### 1.3.0 (2016-08-07)
+
+- Updated Node.js to 4.4.7
+
 ### 1.2.0 (2016-04-05)
 
 - Updated Node.js to 0.10.43
