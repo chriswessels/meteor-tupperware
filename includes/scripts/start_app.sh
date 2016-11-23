@@ -9,7 +9,9 @@ if [ ! -f $OUTPUT_DIR/bundle/main.js ]; then
   exit 1
 fi
 
-export PORT=80
+if [ -z "$PORT" ]; then
+  export PORT=80
+fi
 
 if [ -z "$NODE_ENV" ]; then
   export NODE_ENV="production"
@@ -19,6 +21,6 @@ if [ -z "$METEOR_ENV" ]; then
   export METEOR_ENV="production"
 fi
 
-echo "[-] meteor-tupperware is starting your application with NODE_ENV=$NODE_ENV and METEOR_ENV=$METEOR_ENV..."
+echo "[-] meteor-tupperware is starting your application with NODE_ENV=$NODE_ENV and METEOR_ENV=$METEOR_ENV on port $PORT..."
 
 exec node $OUTPUT_DIR/bundle/main.js "$@"
