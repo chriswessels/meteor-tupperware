@@ -44,7 +44,12 @@ Assuming you have Docker running, you can build an image of your Meteor.js app b
 
 ## Running your app image
 
-The root process of the image will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile. Node.js will listen on port 80 inside the container, but you can bind this to any port on the host.
+The root process of the image will be set to the Node.js entrypoint for your Meteor application, so you can pass runtime settings straight into `docker run -e`, or bake them into your image with `ENV` directives in your Dockerfile.
+
+Node.js will listen on port 80 inside the container, but you can bind this to any port on the host. You can also specify a different internal port if you need to like this:
+
+    FROM    quay.io/chriswessels/meteor-tupperware
+    ENV     PORT=8080
 
 Example of passing options into `docker run` at runtime:
 
