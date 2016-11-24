@@ -2,6 +2,10 @@
 
 ## Change log
 
+### 1.3.1 (2016-11-24)
+
+- Added ability to override internal port to bind to (thanks @aldeed)
+
 ### 1.3.0 (2016-08-07)
 
 - Updated Node.js to 4.4.7
