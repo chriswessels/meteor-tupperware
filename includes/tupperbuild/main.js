@@ -311,7 +311,7 @@ function buildApp (done) {
   var serverFlag = tupperwareJson.buildOptions.mobileServerUrl ? '--server ' + tupperwareJson.buildOptions.mobileServerUrl + ' ' : '',
       additionalFlags = tupperwareJson.buildOptions.additionalFlags ? tupperwareJson.buildOptions.additionalFlags : '';
 
-  var cmd = "meteor build --directory " + process.env.OUTPUT_DIR + " --architecture os.linux.x86_64 " + serverFlag + additionalFlags;
+  var cmd = "meteor build --allow-superuser --directory " + process.env.OUTPUT_DIR + " --architecture os.linux.x86_64 " + serverFlag + additionalFlags;
   child_process.exec(cmd, {
     cwd: copyPath
   }, _.partial(handleExecError, done, cmd, 'build your application'));
