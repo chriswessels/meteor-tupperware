@@ -1,5 +1,7 @@
 # chriswessels/meteor-tupperware
 
+Notice: This package is no longer maintained. I recommend using the following alternative: https://github.com/jshimko/meteor-launchpad
+
 This is a base Docker image that allows you to bundle your [Meteor.js](https://www.meteor.com) application into a lean, production-ready Docker image that you can deploy across your containerised infrastructure.
 
 [![Docker Repository on Quay.io](https://quay.io/repository/chriswessels/meteor-tupperware/status "Docker Repository on Quay.io")](https://quay.io/repository/chriswessels/meteor-tupperware)
